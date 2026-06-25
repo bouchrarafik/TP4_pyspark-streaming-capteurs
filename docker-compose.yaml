@@ -1,0 +1,91 @@
+services:
+  namenode:
+    image: apache/hadoop:3.4.3
+    hostname: namenode
+    platform: linux/amd64
+    command: ["hdfs", "namenode"]
+    ports:
+      - "9870:9870"
+      - "8020:8020"
+    env_file:
+      - ./config
+    environment:
+        ENSURE_NAMENODE_DIR: "/tmp/hadoop-root/dfs/name"
+    volumes:
+      - ./volumes/namenode:/data
+  datanode1:
+    image: apache/hadoop:3.4.3
+    hostname: datanode1
+    platform: linux/amd64
+    command: ["hdfs", "datanode"]
+    env_file:
+      - ./config
+  datanode2:
+    image: apache/hadoop:3.4.3
+    hostname: datanode2
+    platform: linux/amd64
+    command: ["hdfs", "datanode"]
+    env_file:
+      - ./config  
+  datanode3:
+    image: apache/hadoop:3.4.3
+    hostname: datanode3
+    platform: linux/amd64
+    command: ["hdfs", "datanode"]
+    env_file:
+      - ./config  
+  datanode4:
+    image: apache/hadoop:3.4.3
+    hostname: datanode4
+    platform: linux/amd64
+    command: ["hdfs", "datanode"]
+    env_file:
+      - ./config   
+  datanode5:
+    image: apache/hadoop:3.4.3
+    hostname: datanode5
+    platform: linux/amd64
+    command: ["hdfs", "datanode"]
+    env_file:
+      - ./config                   
+  resourcemanager:
+    image: apache/hadoop:3.4.3
+    hostname: resourcemanager
+    platform: linux/amd64
+    command: ["yarn", "resourcemanager"]
+    ports:
+      - "8088:8088"
+    env_file:
+      - ./config
+
+    volumes:
+      - ./test.sh:/opt/test.sh
+  nodemanager:
+    image: apache/hadoop:3.4.3
+    platform: linux/amd64
+    command: ["yarn", "nodemanager"]
+    env_file:
+      - ./config
+  spark-master:
+    image: spark:latest
+    hostname: spark-master
+    container_name: spark-master
+    command: ["/opt/spark/bin/spark-class", "org.apache.spark.deploy.master.Master",
+              "--host", "spark-master", "--port", "7077", "--webui-port", "8080"]
+    ports: ["7077:7077", "8081:8080"]
+
+  spark-worker-1:
+    image: spark:latest
+    hostname: spark-worker-1
+    container_name: spark-worker-1
+    command: ["/opt/spark/bin/spark-class", "org.apache.spark.deploy.worker.Worker",
+              "spark://spark-master:7077"]
+    depends_on: [spark-master]
+
+  spark-worker-2:
+    image: spark:latest
+    hostname: spark-worker-2
+    container_name: spark-worker-2
+    command: ["/opt/spark/bin/spark-class", "org.apache.spark.deploy.worker.Worker",
+              "spark://spark-master:7077"]
+    depends_on: [spark-master]
